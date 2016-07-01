@@ -1,0 +1,9 @@
+/dist/
+/build/
+*.swp
+*.swo
+*.pyc
+.eggs/*
+*.egg-info
+*.egg
+.DS_Store

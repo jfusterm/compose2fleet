@@ -73,7 +73,25 @@ def create_rkt_ports(ports):
 	return rkt_port
 
 def create_rkt_volumes(volumes):
-	"""Convert the Docker compose volumes format to rkt's"""
+	"""
+	Convert the Docker compose volumes format to rkt's
+
+	Volume types:
+		- /var/lib/mysql >> NOT SUPPORTED
+		- /opt/data:/var/lib/mysql >> SUPPORTED
+		- datavolume:/var/lib/mysql >> SUPPORTED
+		- /opt/logs:/var/log/mysql:ro >> SUPPORTED
+
+	Return:
+		- dict composed of list of dicts
+	Example:
+		- {'rkt_volumes':
+		  	[
+		  		{'rkt_host_volume': 'datavolume', 'rkt_volume': 'datavolume:/var/lib/mysql', 'rkt_volume_type': 'empty', 'read_only': 'false', 'rkt_mount_point': '/var/lib/mysql'},
+		  		{'rkt_host_volume': '/opt/logs', 'rkt_volume': '/opt/logs:/var/log/mysql:ro', 'rkt_volume_type': 'host', 'rkt_mount_point': '/var/log/mysql', 'read_only': 'true', 'rkt_volume_name': 'volume-opt-logs'}
+		  	]
+		  }
+	"""
 	rkt_volumes = {}
 	rkt_volume = {}
 	rkt_volume_data = []
@@ -82,7 +100,16 @@ def create_rkt_volumes(volumes):
 		if ":" in volume:
 			rkt_volume['rkt_volume'] = volume
 			rkt_volume['rkt_volume_type'] = "empty"
-			host_volume, mount_point = volume.split(":")
+			volume_parts = volume.split(":")
+
+			if len(volume_parts) == 3:
+				host_volume, mount_point, read_only = volume_parts
+				if "ro" in read_only:
+					read_only = "true"
+			else:
+				host_volume, mount_point = volume_parts
+				read_only = "false"
+
 			rkt_volume['rkt_host_volume'] = host_volume
 			if "/" in host_volume:
 				rkt_volume['rkt_volume_type'] = "host"
@@ -91,6 +118,7 @@ def create_rkt_volumes(volumes):
 			continue
 
 		rkt_volume['rkt_mount_point'] = mount_point
+		rkt_volume['read_only'] = read_only
 		rkt_volume_data.append(rkt_volume.copy())
 
 	rkt_volumes['rkt_volumes'] = rkt_volume_data

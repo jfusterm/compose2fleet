@@ -17,10 +17,10 @@ ExecStart=/usr/bin/rkt run \\
     {%- endfor -%}{% endif %}
     {%- if rkt_volumes %}{%- for rkt_volume in rkt_volumes %}
     {%- if rkt_volume['rkt_volume_type'] == "host" %}
-    --volume {{ rkt_volume['rkt_volume_name'] }},kind=host,source={{ rkt_volume['rkt_host_volume'] }} \\
+    --volume {{ rkt_volume['rkt_volume_name'] }},kind=host,source={{ rkt_volume['rkt_host_volume'] }},readOnly={{ rkt_volume['read_only'] }} \\
     --mount volume={{ rkt_volume['rkt_volume_name'] }},target={{ rkt_volume['rkt_mount_point'] }} \\
     {%- else %}
-    --volume {{ rkt_volume['rkt_host_volume'] }},kind=empty \\
+    --volume {{ rkt_volume['rkt_host_volume'] }},kind=empty,readOnly={{ rkt_volume['read_only'] }}  \\
     --mount volume={{ rkt_volume['rkt_host_volume'] }},target={{ rkt_volume['rkt_mount_point'] }} \\
     {%- endif %}
     {%- endfor -%}{% endif %}

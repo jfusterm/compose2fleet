@@ -75,19 +75,25 @@ def create_rkt_ports(ports):
 def create_rkt_volumes(volumes):
 	"""Convert the Docker compose volumes format to rkt's"""
 	rkt_volumes = {}
+	rkt_volume = {}
+	rkt_volume_data = []
 
 	for volume in volumes:
 		if ":" in volume:
-			rkt_volumes['rkt_volume_type'] = "empty"
+			rkt_volume['rkt_volume'] = volume
+			rkt_volume['rkt_volume_type'] = "empty"
 			host_volume, mount_point = volume.split(":")
-			rkt_volumes['rkt_host_volume'] = host_volume
+			rkt_volume['rkt_host_volume'] = host_volume
 			if "/" in host_volume:
-				rkt_volumes['rkt_volume_type'] = "host"
-				rkt_volumes['rkt_volume_name'] = "volume" + re.sub('/','-',host_volume)
+				rkt_volume['rkt_volume_type'] = "host"
+				rkt_volume['rkt_volume_name'] = "volume" + re.sub('/','-',host_volume)
 		else:
 			continue
 
-		rkt_volumes['rkt_mount_point'] = mount_point
+		rkt_volume['rkt_mount_point'] = mount_point
+		rkt_volume_data.append(rkt_volume.copy())
+
+	rkt_volumes['rkt_volumes'] = rkt_volume_data
 
 	return rkt_volumes
 

@@ -15,13 +15,13 @@ ExecStart=/usr/bin/rkt run \\
     {%- if ports %}{% for port in ports %}
     --port {{ port }} \\
     {%- endfor -%}{% endif %}
-    {%- if volumes and rkt_host_volume %}{% for volume in volumes %}
-    {%- if rkt_volume_type == "host" %}
-    --volume {{ rkt_volume_name }},kind=host,source={{ rkt_host_volume }} \\
-    --mount volume={{ rkt_volume_name }},target={{ rkt_mount_point }} \\
+    {%- if rkt_volumes %}{%- for rkt_volume in rkt_volumes %}
+    {%- if rkt_volume['rkt_volume_type'] == "host" %}
+    --volume {{ rkt_volume['rkt_volume_name'] }},kind=host,source={{ rkt_volume['rkt_host_volume'] }} \\
+    --mount volume={{ rkt_volume['rkt_volume_name'] }},target={{ rkt_volume['rkt_mount_point'] }} \\
     {%- else %}
-    --volume {{ rkt_host_volume }},kind=empty \\
-    --mount volume={{ rkt_host_volume }},target={{ rkt_mount_point }} \\
+    --volume {{ rkt_volume['rkt_host_volume'] }},kind=empty \\
+    --mount volume={{ rkt_volume['rkt_host_volume'] }},target={{ rkt_volume['rkt_mount_point'] }} \\
     {%- endif %}
     {%- endfor -%}{% endif %}
     {%- if environment %}{% for variable in environment %}

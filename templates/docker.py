@@ -33,10 +33,10 @@ ExecStart=/usr/bin/docker run \\
     {%- endfor -%}{% endif %}
     {%- if entrypoint %}
     --entrypoint {{ entrypoint }} \\
-    {% endif %}
-    {{ image }} {% if command %} \\
+    {%- endif %}
+    {{ image }} {%- if command %} \\
     {{ command }}
-    {% endif %}
+    {%- endif %}
 ExecStop=/usr/bin/docker stop {{ container_name }}
 
 [X-Fleet]

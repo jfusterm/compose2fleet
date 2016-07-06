@@ -1,0 +1,19 @@
+[Unit]
+Description=influxdb
+After=docker.service 
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm -f influxdb
+ExecStartPre=/usr/bin/docker pull jfusterm/influxdb:0.13.0
+ExecStart=/usr/bin/docker run \
+    --name influxdb \
+    -p 2003:2003 \
+    -p 8083:8083 \
+    -p 8086:8086 \
+    --restart on-failure \
+    -v influxdb:/influxdb \
+    jfusterm/influxdb:0.13.0
+ExecStop=/usr/bin/docker stop influxdb
+
+[X-Fleet]

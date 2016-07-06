@@ -1,0 +1,19 @@
+[Unit]
+Description=influxdb
+After=network-online.target 
+Requires=network-online.target
+
+[Service]
+ExecStartPre=/usr/bin/rkt fetch --insecure-options=image docker://jfusterm/influxdb:0.13.0
+ExecStart=/usr/bin/rkt run \
+    --hostname influxdb \
+    --port 2003-tcp:2003 \
+    --port 8083-tcp:8083 \
+    --port 8086-tcp:8086 \
+    --volume influxdb,kind=empty,readOnly=false  \
+    --mount volume=influxdb,target=/influxdb \
+    docker://jfusterm/influxdb:0.13.0
+ExecStopPost=/usr/bin/rkt gc --grace-period=0
+Restart=on-failure
+
+[X-Fleet]

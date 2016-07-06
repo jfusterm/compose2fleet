@@ -51,19 +51,19 @@ Given a `docker-compose.yml` file with either one or several services defined, `
     version: '2'
     services:
       grafana:
-        image: grafana:latest
+        image: jfusterm/grafana:latest
         container_name: grafana
         restart: on-failure
         ports:
         - "3000:3000"
         volumes:
-        - /home/grafana/data:/grafana/data
-        - /home/grafana/logs:/grafana/logs
+        - /opt/grafana/data:/grafana/data
+        - /opt/grafana/logs:/grafana/logs:ro
         depends_on:
         - influxdb
         - prometheus
       influxdb:
-        image: influxdb:0.13.0
+        image: jfusterm/influxdb:0.13.0
         container_name: influxdb
         restart: on-failure
         ports:
@@ -73,7 +73,7 @@ Given a `docker-compose.yml` file with either one or several services defined, `
         volumes:
         - influxdb:/influxdb
       prometheus:
-        image: prometheus:0.20.0
+        image: jfusterm/prometheus:0.20.0
         container_name: prometheus
         restart: on-failure
         ports:
@@ -85,7 +85,6 @@ Given a `docker-compose.yml` file with either one or several services defined, `
     networks:
       gip_net:
         driver: bridge
-
 
 ^^^^^^
 Docker
@@ -112,13 +111,13 @@ Transforming the `docker-compose.yml` using Docker as the container runtime.
 
     [Service]
     ExecStartPre=-/usr/bin/docker rm -f grafana
-    ExecStartPre=/usr/bin/docker pull grafana:latest
+    ExecStartPre=/usr/bin/docker pull jfusterm/grafana:latest
     ExecStart=/usr/bin/docker run \
         --name grafana \
         -p 3000:3000 \
         --restart on-failure \
-        -v /home/grafana/data:/grafana/data \
-        -v /home/grafana/logs:/grafana/logs \
+        -v /opt/grafana/data:/grafana/data \
+        -v /opt/grafana/logs:/grafana/logs:ro \
         jfusterm/grafana:latest
     ExecStop=/usr/bin/docker stop grafana
 
@@ -137,7 +136,7 @@ Transforming the `docker-compose.yml` using Docker as the container runtime.
 
     [Service]
     ExecStartPre=-/usr/bin/docker rm -f prometheus
-    ExecStartPre=/usr/bin/docker pull prometheus:0.20.0
+    ExecStartPre=/usr/bin/docker pull jfusterm/prometheus:0.20.0
     ExecStart=/usr/bin/docker run \
         --name prometheus \
         -p 9090:9090 \
@@ -146,7 +145,7 @@ Transforming the `docker-compose.yml` using Docker as the container runtime.
         jfusterm/prometheus:0.20.0
     ExecStop=/usr/bin/docker stop prometheus
 
-    [X-Fleet]
+[X-Fleet]
 
 * InfluxDB service
 
@@ -159,7 +158,7 @@ Transforming the `docker-compose.yml` using Docker as the container runtime.
 
     [Service]
     ExecStartPre=-/usr/bin/docker rm -f influxdb
-    ExecStartPre=/usr/bin/docker pull influxdb:0.13.0
+    ExecStartPre=/usr/bin/docker pull jfusterm/influxdb:0.13.0
     ExecStart=/usr/bin/docker run \
         --name influxdb \
         -p 2003:2003 \
@@ -215,10 +214,10 @@ A `.conf` file will be generated for each user defined network in the `docker-co
     ExecStart=/usr/bin/rkt run \
         --hostname grafana \
         --port 3000-tcp:3000 \
-        --volume volume-home-grafana-logs,kind=host,source=/home/grafana/logs \
-        --mount volume=volume-home-grafana-logs,target=/grafana/logs \
-        --volume volume-home-grafana-logs,kind=host,source=/home/grafana/logs \
-        --mount volume=volume-home-grafana-logs,target=/grafana/logs \
+        --volume volume-opt-grafana-data,kind=host,source=/opt/grafana/data,readOnly=false \
+        --mount volume=volume-opt-grafana-data,target=/grafana/data \
+        --volume volume-opt-grafana-logs,kind=host,source=/opt/grafana/logs,readOnly=true \
+        --mount volume=volume-opt-grafana-logs,target=/grafana/logs \
         docker://jfusterm/grafana:latest
     ExecStopPost=/usr/bin/rkt gc --grace-period=0
     Restart=on-failure
@@ -263,13 +262,14 @@ A `.conf` file will be generated for each user defined network in the `docker-co
         --port 2003-tcp:2003 \
         --port 8083-tcp:8083 \
         --port 8086-tcp:8086 \
-        --volume influxdb,kind=empty \
+        --volume influxdb,kind=empty,readOnly=false  \
         --mount volume=influxdb,target=/influxdb \
         docker://jfusterm/influxdb:0.13.0
     ExecStopPost=/usr/bin/rkt gc --grace-period=0
     Restart=on-failure
 
     [X-Fleet]
+
 
 ----------------
 Docker container

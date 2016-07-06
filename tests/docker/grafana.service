@@ -1,0 +1,21 @@
+[Unit]
+Description=grafana
+After=docker.service influxdb.service prometheus.service 
+Wants=influxdb.service prometheus.service 
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/docker rm -f grafana
+ExecStartPre=/usr/bin/docker pull jfusterm/grafana:latest
+ExecStart=/usr/bin/docker run \
+    --name grafana \
+    -p 3000:3000 \
+    --restart on-failure \
+    -v /opt/grafana/data:/grafana/data \
+    -v /opt/grafana/logs:/grafana/logs:ro \
+    jfusterm/grafana:latest
+ExecStop=/usr/bin/docker stop grafana
+
+[X-Fleet]
+MachineOf=influxdb.service
+MachineOf=prometheus.service

@@ -1,0 +1,22 @@
+[Unit]
+Description=grafana
+After=network-online.target influxdb.service prometheus.service 
+Wants=influxdb.service prometheus.service 
+Requires=network-online.target
+
+[Service]
+ExecStartPre=/usr/bin/rkt fetch --insecure-options=image docker://jfusterm/grafana:latest
+ExecStart=/usr/bin/rkt run \
+    --hostname grafana \
+    --port 3000-tcp:3000 \
+    --volume volume-opt-grafana-data,kind=host,source=/opt/grafana/data,readOnly=false \
+    --mount volume=volume-opt-grafana-data,target=/grafana/data \
+    --volume volume-opt-grafana-logs,kind=host,source=/opt/grafana/logs,readOnly=true \
+    --mount volume=volume-opt-grafana-logs,target=/grafana/logs \
+    docker://jfusterm/grafana:latest
+ExecStopPost=/usr/bin/rkt gc --grace-period=0
+Restart=on-failure
+
+[X-Fleet]
+MachineOf=influxdb.service
+MachineOf=prometheus.service

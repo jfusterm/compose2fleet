@@ -1,0 +1,37 @@
+version: '2'
+services:
+  grafana:
+    image: jfusterm/grafana:latest
+    container_name: grafana
+    restart: on-failure
+    ports:
+    - "3000:3000"
+    volumes:
+    - /opt/grafana/data:/grafana/data
+    - /opt/grafana/logs:/grafana/logs:ro
+    depends_on:
+    - influxdb
+    - prometheus
+  influxdb:
+    image: jfusterm/influxdb:0.13.0
+    container_name: influxdb
+    restart: on-failure
+    ports:
+    - "2003:2003"
+    - "8083:8083"
+    - "8086:8086"
+    volumes:
+    - influxdb:/influxdb
+  prometheus:
+    image: jfusterm/prometheus:0.20.0
+    container_name: prometheus
+    restart: on-failure
+    ports:
+    - "9090:9090"
+    volumes:
+    - /prometheus
+volumes:
+   influxdb:
+networks:
+  gip_net:
+    driver: bridge

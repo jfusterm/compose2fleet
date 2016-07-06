@@ -1,7 +1,7 @@
 .PHONY: docker build install clean
 
-IMAGE = compose2fleet
-VERSION = 0.0.1
+IMAGE = jfusterm/compose2fleet
+VERSION := $(shell sed -nr 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p' compose2fleet/version.py)
 
 default: build
 

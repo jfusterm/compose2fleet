@@ -1,0 +1,15 @@
+[Unit]
+Description=prometheus
+After=network-online.target 
+Requires=network-online.target
+
+[Service]
+ExecStartPre=/usr/bin/rkt fetch --insecure-options=image docker://jfusterm/prometheus:0.20.0
+ExecStart=/usr/bin/rkt run \
+    --hostname prometheus \
+    --port 9090-tcp:9090 \
+    docker://jfusterm/prometheus:0.20.0
+ExecStopPost=/usr/bin/rkt gc --grace-period=0
+Restart=on-failure
+
+[X-Fleet]

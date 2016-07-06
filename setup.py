@@ -1,7 +1,8 @@
 from setuptools import setup, find_packages
+import compose2fleet
 
 setup(name='compose2fleet',
-      version='0.0.1',
+      version=compose2fleet.__version__,
       description='Convert Docker Compose files to CoreOS Fleet units',
       url='http://github.com/jfusterm/compose2fleet',
       author='Joan Fuster',
@@ -13,6 +14,6 @@ setup(name='compose2fleet',
         'jinja2',
         'pyyaml'
       ],
-      packages=find_packages(),
+      packages=find_packages(exclude=['tests*']),
       zip_safe=False,
 )

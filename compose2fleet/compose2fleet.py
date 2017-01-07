@@ -150,7 +150,8 @@ def get_compose_data(compose_file, service):
 
 def convert_to_rkt(compose_file, path):
 	"""Convert the Docker compose file to Fleet unit file using Rkt"""
-	if compose_file['networks']:
+	#print (compose_file)
+	if 'networks' in compose_file:
 		i = 42
 		compose_networks = [network for network in compose_file['networks']]
 		for network in compose_networks:
@@ -161,8 +162,11 @@ def convert_to_rkt(compose_file, path):
 
 	for service in compose_file['services']:
 		compose_data = get_compose_data(compose_file, service)
-		compose_data['ports'] = create_rkt_ports(compose_data['ports'])
-		compose_data.update(create_rkt_volumes(compose_data['volumes']))
+		#print (compose_data)
+		if 'ports' in compose_data:
+			compose_data['ports'] = create_rkt_ports(compose_data['ports'])
+		if 'volumes' in compose_data:
+			compose_data.update(create_rkt_volumes(compose_data['volumes']))
 		template = rkt.rkt_template()
 
 		create_file(compose_data, service, template, path, msg="Rkt service created: ", ext=".service")
